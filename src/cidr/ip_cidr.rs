@@ -15,6 +15,25 @@ pub enum IpCidr {
     V6(Ipv6Cidr),
 }
 
+#[cfg(feature = "serde")]
+impl<'de> serde::Deserialize<'de> for IpCidr {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+            D: serde::Deserializer<'de> {
+        let s = <String>::deserialize(deserializer)?;
+        IpCidr::from_str(&s).map_err(serde::de::Error::custom)
+    }
+}
+
+#[cfg(feature = "serde")]
+impl<'de> serde::Serialize for IpCidr {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+            S: serde::Serializer {
+        serializer.serialize_str(&self.to_string())
+    }
+}
+
 impl IpCidr {
     #[allow(clippy::should_implement_trait)]
     pub fn from_str<S: AsRef<str>>(s: S) -> Result<IpCidr, IpCidrError> {
